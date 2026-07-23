@@ -1,0 +1,51 @@
+config-version: 2
+
+name: odoo_2_dbt
+version: 0.1.0
+
+profile: odoo_2_dbt
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  odoo_2_dbt:
+    # Staging - one-to-one views on raw Odoo tables, hard rules only
+    staging:
+      +materialized: view
+      +schema: staging
+
+    # Raw Vault - source-aligned Data Vault 2.0 structures, organized by domain
+    raw_vault:
+      +materialized: incremental
+      +schema: raw_vault
+
+    # Business Vault - soft rules, standardization, derived structures
+    business_vault:
+      +materialized: table
+      +schema: business_vault
+
+    # Information Marts - star schema (conformed dims in core/, domain facts + dims)
+    marts:
+      +materialized: table
+      +schema: marts
+
+    # Semantic Business Reporting Layer - plain views, the deliverable
+    reports:
+      +materialized: view
+      +schema: reports
+
+seeds:
+  odoo_2_dbt:
+    +schema: staging
+
+flags:
+  require_generic_test_arguments_property: true
